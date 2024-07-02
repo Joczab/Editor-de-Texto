@@ -1,5 +1,6 @@
 # pip install future
 # pip install ntk
+import os
 import tkinter as tk
 from idlelib import *
 from tkinter import *
@@ -82,10 +83,11 @@ def abrir():
     ruta = FileDialog.askopenfilename(
         initialdir='.',
         filetypes=(  # Es una tupla con un elemento
-            ("Ficheros de texto", "*.txt"),
+            ("Archivos de Texto", "*.txt"),("Archivos .py", "*.py"), ("Todos los Archivos", "*.*"),
         ),
         title="Abrir un fichero."
     )
+    nombre_archivo = os.path.basename(ruta)
     mensaje.set('Editor de Texto en python')
     # Si la ruta es válida abrimos el contenido en lectura
     if ruta != "":
@@ -94,7 +96,7 @@ def abrir():
         texto.delete(1.0, 'end')  # Nos aseguramos de que esté vacío
         texto.insert('insert', contenido)  # Le insertamos el contenido
         fichero.close()  # Cerramos el fichero
-        root.title(ruta + " - Editor De Texto en python")  # Cambiamos el título
+        root.title(nombre_archivo + "-- Editor de texto en Python")  # Cambiamos el título
         mensaje.set('Editor de Texto en python')
 
 def guardar():
@@ -114,7 +116,8 @@ def guardar_como():
     mensaje.set("Guardar fichero como")
 
     fichero = FileDialog.asksaveasfile(title="Guardar fichero", mode="w", defaultextension="txt", 
-                                       filetypes=[("Archivos de Texto", "*.txt"), ("Todos los Archivos", "*.*")])
+                                       filetypes=[("Archivos de Texto", "*.txt"),
+                                                  ("Archivos .py", "*.py"), ("Todos los Archivos", "*.*")])
 
     if fichero is not None:
         ruta = fichero.name
@@ -150,7 +153,7 @@ def acercade():
     # Label acerca de...
     label = tk.Label(acercade1, text="Editor de texto en Python", height=3, background='#FFFFFF')
     label.pack()
-    label1 = tk.Label(acercade1, text="ditor de texto, realizado en python\n con tkinter ", height=8, background='#FFFFFF')
+    label1 = tk.Label(acercade1, text="Editor de texto, realizado en python\n con tkinter ", height=8, background='#FFFFFF')
     label1.pack()
     # Boton salir
     button1 = tk.Button(acercade1, text="Salir", width=26, height=20, command=lambda:[acercade1.destroy(), mensaje.set("Editor de Texto en Python")])
@@ -190,7 +193,7 @@ if __name__ == '__main__':
     menueditar.add_command(label="Atras", accelerator="Ctrl+U", command=undo)
     menueditar.add_command(label="Adelante", accelerator="Ctrl+Y", command=redo)
     menueditar.add_command(label="Seleccionar todo", accelerator="Ctrl+A", command=select_all)
-    #menubarra.add_cascade(label="Editar", menu=menueditar)
+    menubarra.add_cascade(label="Editar", menu=menueditar)
     formatmenu = Menu(menubarra, tearoff=0,  background='#FFFFFF')
     formatmenu.add_command(label="Cambiar Fondo", command=changeBg)
     formatmenu.add_command(label="Color de Fuente", command=changeFg)
@@ -198,7 +201,7 @@ if __name__ == '__main__':
     menueditar.add_cascade(label="Formato", menu=formatmenu)
     menuayuda = Menu(menubarra, tearoff=0,  background='#FFFFFF')
     menuayuda.add_command(label="Acerca de...", command=acercade)
-    #menubarra.add_cascade(label="Ayuda", menu=menuayuda)
+    menubarra.add_cascade(label="Ayuda", menu=menuayuda)
     text = tk.Text(root)
 
     right_click_text_menu = Menu(text, tearoff=0,  background='#FFFFFF')
@@ -221,3 +224,6 @@ if __name__ == '__main__':
     monitor.pack(side="left")
     root.config(menu=menubarra)
     root.mainloop()
+    
+    
+ 
