@@ -1,10 +1,3 @@
-Zsa
+hola mundo 1 2 3 4 5 
 
-asd
-a
-sd
-a
-sd
-ads
-
-d
+while for if

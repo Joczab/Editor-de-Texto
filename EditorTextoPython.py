@@ -10,7 +10,33 @@ from tkinter.colorchooser import askcolor
 from tkinter.font import Font, families
 from tkinter import Menu
 global right_click_text_menu, ruta
-# COMANDOS
+import re
+
+# Lista de palabras clave de Python
+palabras_clave = ['import', 'def', 'from', 'global', 'if', 'else','elif','match','while','int','for']
+
+# Patrones para números e identificadores
+patron_numero = r'^\d+(\.\d+)?$'
+patron_identificador = r'^\w+$'
+
+def analizar_lexico(texto):
+    tokens_clasificados = []
+    # Dividir el texto en tokens
+    tokens = re.findall(r'\w+|[^\w\s]', texto, re.UNICODE)
+    
+    for token in tokens:
+        if token in palabras_clave:
+            tokens_clasificados.append((token, 'PALABRA CLAVE'))
+        elif re.match(patron_numero, token):
+            tokens_clasificados.append((token, 'NUMERO'))
+        elif re.match(patron_identificador, token):
+            tokens_clasificados.append((token, 'IDENTIFICADOR'))
+        else:
+            tokens_clasificados.append((token, 'SIMBOLO'))
+    
+    return tokens_clasificados
+
+
 
 def copy():
     texto.event_generate('<<Copy>>')
@@ -60,6 +86,7 @@ def right_click_menu(event):
 
 
 def right_click_menu_destroy(widget):
+    
     # semplicemente toglie il menù apparentemente senza perdite di memoria
     right_click_text_menu.unpost()
 
@@ -72,6 +99,21 @@ def nuevo():
     root.title("Editor de Texto en python")
 
 
+def anilisis_lexico():
+    
+    global ruta
+    mensaje.set('Abrir fichero')
+    ruta = FileDialog.askopenfilename(initialdir='.', filetypes=(("Archivos de Texto", "*.txt"), 
+                                                                 ("Archivos .py", "*.py"), 
+                                                                 ("Todos los Archivos", "*.*")), 
+                                      title="Abrir un fichero.")
+    
+    with open(ruta, 'r', encoding='utf-8') as archivo:
+        texto_prueba = archivo.read()
+    print(analizar_lexico(texto_prueba))
+    
+   
+    
 def abrir():
     # Indicamos que la ruta es respecto a la variable global
     # Debemos de forzar esta lectura global porque los comandos
@@ -83,7 +125,9 @@ def abrir():
     ruta = FileDialog.askopenfilename(
         initialdir='.',
         filetypes=(  # Es una tupla con un elemento
-            ("Archivos de Texto", "*.txt"),("Archivos .py", "*.py"), ("Todos los Archivos", "*.*"),
+            ("Archivos de Texto", "*.txt"),
+            ("Archivos .py", "*.py"), 
+            ("Todos los Archivos", "*.*"),
         ),
         title="Abrir un fichero."
     )
@@ -96,7 +140,7 @@ def abrir():
         texto.delete(1.0, 'end')  # Nos aseguramos de que esté vacío
         texto.insert('insert', contenido)  # Le insertamos el contenido
         fichero.close()  # Cerramos el fichero
-        root.title(nombre_archivo + "-- Editor de texto en Python")  # Cambiamos el título
+        root.title(nombre_archivo + " -- Editor de texto en Python")  # Cambiamos el título
         mensaje.set('Editor de Texto en python')
 
 def guardar():
@@ -117,7 +161,8 @@ def guardar_como():
 
     fichero = FileDialog.asksaveasfile(title="Guardar fichero", mode="w", defaultextension="txt", 
                                        filetypes=[("Archivos de Texto", "*.txt"),
-                                                  ("Archivos .py", "*.py"), ("Todos los Archivos", "*.*")])
+                                                  ("Archivos .py", "*.py"), 
+                                                  ("Todos los Archivos", "*.*")])
 
     if fichero is not None:
         ruta = fichero.name
@@ -181,6 +226,7 @@ if __name__ == '__main__':
     menuarchivo.add_command(label="Abrir", command=abrir)
     menuarchivo.add_command(label="Guardar", command=guardar)
     menuarchivo.add_command(label="Guardar Como", command=guardar_como)
+    menuarchivo.add_command(label="Analisis Lexico", command=anilisis_lexico)
     menuarchivo.add_separator()
     menuarchivo.add_command(label="Salir", command=root.quit)
     menubarra.add_cascade(label="Archivo", menu=menuarchivo)
@@ -225,5 +271,3 @@ if __name__ == '__main__':
     root.config(menu=menubarra)
     root.mainloop()
     
-    
- 

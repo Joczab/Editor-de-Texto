@@ -1,0 +1,15 @@
+1 + 1 = 2
+
+import pythom
+
+main class():
+
+while 1 = 1:
+
+	opcion = 1:
+if 1:
+	a int = 2 
+elif 2:
+	a int = 1
+
+
