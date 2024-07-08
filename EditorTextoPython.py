@@ -11,6 +11,8 @@ from tkinter.font import Font, families
 from tkinter import Menu
 global right_click_text_menu, ruta
 import re
+import ply.lex as lex
+from ply import yacc
 
 # Lista de palabras clave de Python
 palabras_clave = ['import', 'def', 'from', 'global', 'if', 'else','elif','match','while','int','for']
@@ -19,7 +21,91 @@ palabras_clave = ['import', 'def', 'from', 'global', 'if', 'else','elif','match'
 patron_numero = r'^\d+(\.\d+)?$'
 patron_identificador = r'^\w+$'
 
+# Lista de nombres de tokens. Esta es una parte crucial que faltaba.
+tokens = (
+    'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 'IGUAL',
+    'PARENTESIS_IZQUIERDO', 'PARENTESIS_DERECHO', 'NUMBER', 'LETRA', 'DOS_PUNTOS', 'COMA'
+)
+
+# Continuación de las reglas de expresiones regulares para tokens simples
+t_SUMA = r'\+'
+t_RESTA = r'-'
+t_MULTIPLICACION = r'\*'
+t_DIVISION = r'/'
+t_IGUAL = r'='
+t_PARENTESIS_IZQUIERDO = r'\('
+t_PARENTESIS_DERECHO = r'\)'
+t_LETRA = r'[a-zA-Z_][a-zA-Z0-9_]*'
+t_DOS_PUNTOS = r':'
+t_COMA = r','
+
+# Ignorar espacios en blanco
+t_ignore = ' \t'
+
+# Definición de número
+def t_NUMBER(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
+# Definición de error léxico
+def t_error(t):
+    print(f"Caracter no registrado '{t.value[0]}'")
+    t.lexer.skip(1)
+
+# Construir el lexer
+lexer = lex.lex()
+
+# Función para analizar el texto del editor
+def analizar_texto(texto):
+    lexer.input(texto)
+    for tok in lexer:
+        print(tok)
+
+def analisis_sintactico():
+    global ruta
+    mensaje.set('Abrir fichero')
+    ruta = FileDialog.askopenfilename(initialdir='.', filetypes=(("Archivos de Texto", "*.txt"), 
+                                                                 ("Archivos .py", "*.py"), 
+                                                                 ("Todos los Archivos", "*.*")), 
+                                      title="Abrir un fichero.")
+    with open(ruta, 'r', encoding='utf-8') as archivo:
+        texto_prueba = archivo.read()
+    print(analizar_texto(texto_prueba))
+
 def analizar_lexico(texto):
+    # Inicializar un diccionario para clasificar los tokens
+    clasificacion_tokens = {
+        'PALABRA CLAVE': [],
+        'NUMERO': [],
+        'IDENTIFICADOR': [],
+        'SIMBOLO': []
+    }
+    
+    # Dividir el texto en tokens
+    tokens = re.findall(r'\w+|[^\w\s]', texto, re.UNICODE)
+    
+    for token in tokens:
+        if token in palabras_clave:
+            clasificacion_tokens['PALABRA CLAVE'].append(token)
+        elif re.match(patron_numero, token):
+            clasificacion_tokens['NUMERO'].append(token)
+        elif re.match(patron_identificador, token):
+            clasificacion_tokens['IDENTIFICADOR'].append(token)
+        else:
+            clasificacion_tokens['SIMBOLO'].append(token)
+    
+    # Retornar el diccionario con los tokens clasificados
+    return mostrar_resultados_ordenados(clasificacion_tokens)
+
+# Para mostrar los resultados de manera ordenada
+def mostrar_resultados_ordenados(clasificacion_tokens):
+    for categoria in sorted(clasificacion_tokens):
+        print(f"{categoria}:")
+        for token in sorted(clasificacion_tokens[categoria]):
+            print(f" - {token}")
+
+'''def analizar_lexico(texto):
     tokens_clasificados = []
     # Dividir el texto en tokens
     tokens = re.findall(r'\w+|[^\w\s]', texto, re.UNICODE)
@@ -34,9 +120,10 @@ def analizar_lexico(texto):
         else:
             tokens_clasificados.append((token, 'SIMBOLO'))
     
-    return tokens_clasificados
-
-
+    # Ordenar los tokens clasificados por su clasificación
+    tokens_clasificados.sort(key=lambda x: x[1])
+    
+    return tokens_clasificados'''
 
 def copy():
     texto.event_generate('<<Copy>>')
@@ -227,6 +314,7 @@ if __name__ == '__main__':
     menuarchivo.add_command(label="Guardar", command=guardar)
     menuarchivo.add_command(label="Guardar Como", command=guardar_como)
     menuarchivo.add_command(label="Analisis Lexico", command=anilisis_lexico)
+    menuarchivo.add_command(label="Analisis Sintactico", command=analisis_sintactico)
     menuarchivo.add_separator()
     menuarchivo.add_command(label="Salir", command=root.quit)
     menubarra.add_cascade(label="Archivo", menu=menuarchivo)
