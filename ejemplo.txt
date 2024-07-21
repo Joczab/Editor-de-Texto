@@ -2,7 +2,9 @@
 
 import pythom
 
-main class():
+numeros = (1,2,3,4,5)
+
+def class():
 
 while 1 = 1:
 
@@ -11,5 +13,9 @@ if 1:
 	a int = 2 
 elif 2:
 	a int = 1
+
+for num in numeros:
+	num = num +1
+	print (num)
 
 
